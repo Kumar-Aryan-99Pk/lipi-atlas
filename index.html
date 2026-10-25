@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LipiLoom — A Living Atlas of Brahmic Scripts</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="512x512" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.0/dist/full.css" rel="stylesheet" type="text/css" />
+    <script>
+      tailwind.config = {
+        daisyui: {
+          themes: [
+            {
+              dark: {
+                "color-scheme": "dark",
+                "primary": "#B8F7B0",
+                "primary-content": "#102510",
+                "secondary": "#8b949e",
+                "accent": "#157F1A",
+                "neutral": "#c9d1d9",
+                "base-100": "#0d1117",
+                "base-200": "#161b22",
+                "base-300": "#30363d",
+                "base-content": "#c9d1d9",
+                "info": "#388bfd",
+                "success": "#2ea043",
+                "warning": "#d29922",
+                "error": "#f85149"
+              }
+            },
+            "light",
+            "dracula",
+            {
+              retro: {
+                "color-scheme": "light",
+                "primary": "#8A341B",
+                "primary-content": "#FFF9ED",
+                "secondary": "#35585A",
+                "secondary-content": "#FFFFFF",
+                "accent": "#9B5B08",
+                "accent-content": "#FFFFFF",
+                "neutral": "#393229",
+                "neutral-content": "#FFF9ED",
+                "base-100": "#FFF9ED",
+                "base-200": "#F5EBDD",
+                "base-300": "#DCCBB0",
+                "base-content": "#29251F",
+                "info": "#315D8B",
+                "success": "#286B45",
+                "warning": "#8A4B00",
+                "error": "#A12626"
+              }
+            }
+          ]
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="min-h-screen bg-base-200 text-base-content flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="navbar bg-base-100 shadow-md sticky top-0 z-50 flex-col lg:flex-row gap-4 px-4 py-2 border-b border-base-300">
+        <div class="flex-1">
+            <a id="brandHome" href="index.html" class="btn btn-ghost normal-case text-lg sm:text-xl font-bold whitespace-nowrap" aria-label="LipiLoom home" title="Return to Explore">𑀅 LipiAtlas</a>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="tabs tabs-boxed bg-base-200 border border-base-300 max-w-full overflow-x-auto" id="navTabs">
+            <a class="tab tab-active font-medium transition-all" data-target="explore">Explore</a>
+            <a class="tab font-medium transition-all" data-target="matrix">Alphabet Matrix</a>
+            <a class="tab font-medium transition-all" data-target="comparator">Comparator</a>
+            <a class="tab font-medium transition-all" data-target="digits">Digit Converter</a>
+            <a class="tab font-medium transition-all" data-target="transliterate">Transliterate</a>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto lg:ml-4">
+            <label for="themeSelect" class="sr-only">Color theme</label>
+            <select id="themeSelect" class="select select-bordered select-sm border-base-300 w-full sm:w-auto">
+                <option value="light">Light</option>
+                <option value="dark" selected>Night</option>
+                <option value="dracula">Dracula</option>
+                <option value="retro">Vedic</option>
+            </select>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 py-4 sm:p-6 flex flex-col gap-5 sm:gap-6 relative">
+        
+        <!-- 1. Explore Tab -->
+        <section id="explore" class="view-section active">
+            <!-- Controls Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Selectors & Search -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body p-6 flex flex-col gap-4">
+                        <div>
+                            <h2 class="card-title text-sm mb-2 opacity-70 uppercase tracking-wider">Base Script</h2>
+                            <select id="baseScriptSelect" class="select select-bordered w-full text-lg"></select>
+                        </div>
+                        <div>
+                            <h2 class="card-title text-sm mb-2 opacity-70 uppercase tracking-wider">Search Phoneme</h2>
+                            <input type="text" id="phonemeSearch" class="input input-bordered w-full" placeholder="">
+                        </div>
+                    </div>
+                </div>
+                <!-- Information Card -->
+                <div class="card bg-base-100 shadow-sm border border-base-300">
+                    <div class="card-body p-6">
+                        <h2 class="card-title text-lg mb-2" id="infoTitle">Script Info</h2>
+                        <p id="infoDescription" class="text-sm opacity-80 leading-relaxed"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alphabets Explorer Grid -->
+            <div class="card bg-base-100 shadow-sm border border-base-300">
+                <div class="card-body p-4 sm:p-6">
+                    <div class="flex justify-between items-center mb-6 border-b border-base-300 pb-4">
+                        <h2 class="card-title text-xl">Alphabet Explorer</h2>
+                        <p class="text-sm opacity-70 hidden sm:block">Click any character to compare across all scripts</p>
+                    </div>
+                    <div id="explorerContainer">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Alphabet Matrix Tab -->
+        <section id="matrix" class="view-section">
+            <div class="card bg-base-100 shadow-sm border border-base-300 overflow-hidden">
+                <div class="category-filter-toolbar" id="matrixCategoryFilters" role="group" aria-label="Filter alphabet matrix by category">
+                    <span class="category-filter-label">Show:</span>
+                    <button type="button" class="btn btn-sm btn-primary category-filter-btn" data-filter-target="matrix" data-category="all" aria-pressed="true">All</button>
+                    <button type="button" class="btn btn-sm btn-outline category-filter-btn" data-filter-target="matrix" data-category="vowel" aria-pressed="false">Vowels</button>
+                    <button type="button" class="btn btn-sm btn-outline category-filter-btn" data-filter-target="matrix" data-category="consonant" aria-pressed="false">Consonants</button>
+                    <button type="button" class="btn btn-sm btn-outline category-filter-btn" data-filter-target="matrix" data-category="numeral" aria-pressed="false">Digits</button>
+                </div>
+                <div class="matrix-container card-body p-0">
+                    <table class="table table-sm w-full matrix-table" id="matrixTable">
+                        <thead id="matrixHead">
+                            <!-- Populated by JS -->
+                        </thead>
+                        <tbody id="matrixBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Comparator Tab -->
+        <section id="comparator" class="view-section">
+            <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+                <div class="card-body p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 border-b border-base-300 pb-4">
+                        <div>
+                            <h2 class="card-title text-xl mb-1">Side-by-Side Comparator</h2>
+                            <p class="text-sm opacity-70">Compare between 2 to 4 scripts directly.</p>
+                        </div>
+                        <button id="addComparatorScriptBtn" class="btn btn-outline border-base-300 btn-sm">
+                            + Add Script (Max 4)
+                        </button>
+                    </div>
+                    
+                    <div id="comparatorSelectors" class="grid gap-4 mb-6">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="category-filter-toolbar comparator-filter-toolbar mb-3" id="comparatorCategoryFilters" role="group" aria-label="Filter comparator rows by category">
+                        <span class="category-filter-label">Show:</span>
+                        <button type="button" class="btn btn-sm btn-primary category-filter-btn" data-filter-target="comparator" data-category="all" aria-pressed="true">All</button>
+                        <button type="button" class="btn btn-sm btn-outline category-filter-btn" data-filter-target="comparator" data-category="vowel" aria-pressed="false">Vowels</button>
+                        <button type="button" class="btn btn-sm btn-outline category-filter-btn" data-filter-target="comparator" data-category="consonant" aria-pressed="false">Consonants</button>
+                        <button type="button" class="btn btn-sm btn-outline category-filter-btn" data-filter-target="comparator" data-category="numeral" aria-pressed="false">Digits</button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-base-300 rounded-lg max-h-[70vh]">
+                        <table class="table table-zebra table-fixed w-full text-center" id="comparatorTable">
+                            <thead id="comparatorHead" class="bg-base-200 sticky top-0 z-10"></thead>
+                            <tbody id="comparatorBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Digit Converter Tab -->
+        <section id="digits" class="view-section">
+            <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+                <div class="card-body p-6 text-center sm:text-left">
+                    <h2 class="card-title text-xl mb-2 justify-center sm:justify-start">Convert Numerals</h2>
+                    <p class="text-sm opacity-70 mb-4">Type any number to see it mapped to Brahmic numeral scripts.</p>
+                    <input type="text" id="digitInput" class="input input-bordered input-lg w-full max-w-md" placeholder="e.g. 2026" value="2026">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="digitOutputGrid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- 5. Transliterate Tab -->
+        <section id="transliterate" class="view-section">
+            <div class="card bg-base-100 shadow-sm border border-base-300 mb-6">
+                <div class="card-body p-6">
+                    <h2 class="card-title text-xl mb-4 border-b border-base-300 pb-4">Live Phonetic Transliteration</h2>
+                    <textarea id="translitInput" class="textarea textarea-bordered textarea-lg w-full font-mono" rows="2" placeholder="Type text in Latin/IAST or a supported script…"></textarea>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="translitOutputGrid">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Comparison Modal -->
+    <dialog id="compare_modal" class="modal modal-bottom sm:modal-middle">
+        <div class="modal-box max-w-5xl bg-base-200 border border-base-300 shadow-xl">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+            
+            <div class="text-center mb-6">
+                <h3 class="font-bold text-3xl mb-1" id="modalPhonemeLabel">Ka</h3>
+                
+                <!-- Linguistic Stats -->
+                <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm text-left bg-base-100 p-4 rounded-xl shadow-inner border border-base-300 max-w-3xl mx-auto">
+                    <div><span class="opacity-60 block text-[0.65rem] uppercase font-bold tracking-wider">IAST</span> <strong id="modalIast" class="text-primary font-mono text-base"></strong></div>
+                    <div><span class="opacity-60 block text-[0.65rem] uppercase font-bold tracking-wider">IPA</span> <strong id="modalIpa" class="text-secondary font-mono text-base"></strong></div>
+                    <div><span class="opacity-60 block text-[0.65rem] uppercase font-bold tracking-wider">Articulation</span> <strong id="modalArt"></strong></div>
+                    <div><span class="opacity-60 block text-[0.65rem] uppercase font-bold tracking-wider">Manner</span> <strong id="modalManner"></strong></div>
+                </div>
+
+                <div class="mt-6 inline-block bg-base-100 rounded-2xl shadow border border-base-300 min-w-[120px] p-6">
+                    <span id="modalMainChar" class="modal-brahmic-text text-primary">क</span>
+                    <div class="text-xs font-bold uppercase mt-2 opacity-60" id="modalMainScript">Devanagari</div>
+                </div>
+            </div>
+            
+            <h4 class="font-semibold border-b border-base-300 pb-2 mb-4 text-left">Cross-Script Companions</h4>
+            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3" id="modalComparisonGrid">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+    </div>
+
+    <footer class="site-footer">
+    <div class="site-footer-content">
+        <a href="#explore" class="footer-brand" aria-label="LipiAtlas home">
+            <span class="footer-logo">𑀅</span>
+            <span>LipiAtlas</span>
+        </a>
+
+        <p class="footer-tagline">
+            A Living Atlas of Brahmic Scripts
+        </p>
+
+        <a
+            href="https://github.com/Kumar-Aryan-99Pk"
+            class="github-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Visit my GitHub profile"
+        >
+            <svg
+                class="github-icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+            >
+                <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.17c-3.2.7-3.88-1.36-3.88-1.36-.53-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.73-1.52-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.06 0 0 .96-.31 3.15 1.18a10.94 10.94 0 0 1 5.74 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.77.11 3.06.74.81 1.18 1.84 1.18 3.1 0 4.43-2.68 5.41-5.24 5.7.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/>
+            </svg>
+            <span>Find me on GitHub</span>
+            <span class="github-username">Kumar-Aryan-99Pk</span>
+        </a>
+
+        <div class="footer-divider"></div>
+
+        <p class="footer-copyright">
+            © 2026 LipiAtlas
+        </p>
+    </div>
+</footer>
+    <script src="data.js"></script>
+    <script src="transliterate.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
